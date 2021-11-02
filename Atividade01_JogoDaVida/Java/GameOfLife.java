@@ -43,19 +43,15 @@ public class GameOfLife {
 
     static void printCurrentGeneration(int[][] newGeneration, int N, int generationCounter) {
         int aliveCellsCounter = 0;
-        // System.out.println("Generation" + generationCounter);
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (newGeneration[i][j] == 0){
-                    // System.out.print(".");
                     continue;
                 }
                 else {
                     aliveCellsCounter++;
-                    // System.out.print("*");
                 }
             }
-            // System.out.println();
         }
         System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter);
     }
@@ -66,7 +62,6 @@ public class GameOfLife {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 int aliveNeighbours = getNeighbors(grid, i, j, N);
-                // aliveNeighbours -= grid[i][j];
 
                 if ((grid[i][j] == 1) && (aliveNeighbours < 2))
                     newGeneration[i][j] = 0;
@@ -93,21 +88,6 @@ public class GameOfLife {
     }
 
     static int[][] initialGrid(int N) {
-        // @formatter:off
-        // int[][] grid = {
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-        // };
-        // @formatter:on
-
         int[][] grid = new int[N][N];
 
         for (int i = 0; i < N; i++) {
@@ -137,15 +117,12 @@ public class GameOfLife {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (grid[i][j] == 0){
-                    // System.out.print(".");
                     continue;
                 }
                 else{
                     aliveCellsCounter++;
-                    // System.out.print("*");
                 }
             }
-            // System.out.println();
         }
         System.out.println("Condição Inicial:" + aliveCellsCounter);
 
