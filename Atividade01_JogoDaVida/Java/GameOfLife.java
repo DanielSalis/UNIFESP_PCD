@@ -1,34 +1,12 @@
 package Java;
+
 public class GameOfLife {
 
     public static void main(String[] args) {
-        int N = 10;
+        int N = 50;
         int generationCounter = 0;
 
-        // @formatter:off
-        int[][] grid = {
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-        };
-        // @formatter:on
-
-        // GLIDER
-        int lin = 1, col = 1;
-        grid[lin][col + 1] = 1;
-        grid[lin + 1][col + 2] = 1;
-        grid[lin + 2][col] = 1;
-        grid[lin + 2][col + 1] = 1;
-        grid[lin + 2][col + 2] = 1;
-
-        initialGrid(grid, N);
+        int[][] grid = initialGrid(N);
         runGame(grid, N, generationCounter);
     }
 
@@ -43,17 +21,18 @@ public class GameOfLife {
 
     static void printCurrentGeneration(int[][] newGeneration, int N, int generationCounter) {
         int aliveCellsCounter = 0;
-        System.out.println("Generation" + generationCounter);
+        // System.out.println("Generation" + generationCounter);
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (newGeneration[i][j] == 0)
-                    System.out.print(".");
+                    // System.out.print(".");
+                    continue;
                 else {
                     aliveCellsCounter++;
-                    System.out.print("*");
+                    // System.out.print("*");
                 }
             }
-            System.out.println();
+            // System.out.println();
         }
         System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter);
     }
@@ -92,17 +71,61 @@ public class GameOfLife {
         }
     }
 
-    static void initialGrid(int[][] grid, int N) {
+    static int[][] initialGrid(int N) {
+        // @formatter:off
+        // int[][] grid = {
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
+        //     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+        // };
+        // @formatter:on
+
+        int[][] grid = new int[N][N];
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                grid[i][j] = 0;
+            }
+        }
+
+        // GLIDER
+        int lin = 1, col = 1;
+        grid[lin][col + 1] = 1;
+        grid[lin + 1][col + 2] = 1;
+        grid[lin + 2][col] = 1;
+        grid[lin + 2][col + 1] = 1;
+        grid[lin + 2][col + 2] = 1;
+
+        lin = 10;
+        col = 30;
+        grid[lin][col + 1] = 1;
+        grid[lin][col + 2] = 1;
+        grid[lin + 1][col] = 1;
+        grid[lin + 1][col + 1] = 1;
+        grid[lin + 2][col + 1] = 1;
+
         System.out.println("Condição Inicial");
+        int aliveCellsCounter = 0;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (grid[i][j] == 0)
                     System.out.print(".");
-                else
+                else{
+                    aliveCellsCounter++;
                     System.out.print("*");
+                }
             }
             System.out.println();
         }
-        System.out.println();
+        System.out.println("Condição Inicial:" + aliveCellsCounter);
+
+        return grid;
     }
 }
