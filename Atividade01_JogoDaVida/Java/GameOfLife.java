@@ -37,7 +37,6 @@ public class GameOfLife {
         System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter);
     }
 
-    // Function to print next generation
     static int[][] newGrid(int grid[][], int N) {
         int[][] newGeneration = new int[N][N];
 
