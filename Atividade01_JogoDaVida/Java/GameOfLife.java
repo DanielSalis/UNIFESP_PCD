@@ -3,20 +3,42 @@ package Java;
 public class GameOfLife {
 
     public static void main(String[] args) {
-        int N = 50;
+        int N = 2048;
         int generationCounter = 0;
 
         int[][] grid = initialGrid(N);
         runGame(grid, N, generationCounter);
     }
 
-    static int getNeighbors(int[][] grid, int l, int m) {
-        int neighbours = 0;
-        for (int i = -1; i <= 1; i++)
-            for (int j = -1; j <= 1; j++)
-                neighbours += grid[l + i][m + j];
-
-        return neighbours;
+    static int getNeighbors(int[][] grid, int i, int j, int N) {
+        int edge = N - 1;
+        int count = 0;
+    
+        int a, b;
+        for (a = i - 1; a <= i + 1; a++)
+        {
+            for (b = j - 1; b <= j + 1; b++)
+            {
+                if (a == i && b == j)
+                    continue;
+    
+                int pos_i = a, pos_j = b;
+    
+                if (a < 0)
+                    pos_i = edge;
+                else if (a > edge)
+                    pos_i = 0;
+    
+                if (b < 0)
+                    pos_j = edge;
+                else if (b > edge)
+                    pos_j = 0;
+    
+                count += grid[pos_i][pos_j];
+            }
+        }
+    
+        return count;
     }
 
     static void printCurrentGeneration(int[][] newGeneration, int N, int generationCounter) {
@@ -24,9 +46,10 @@ public class GameOfLife {
         // System.out.println("Generation" + generationCounter);
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                if (newGeneration[i][j] == 0)
+                if (newGeneration[i][j] == 0){
                     // System.out.print(".");
                     continue;
+                }
                 else {
                     aliveCellsCounter++;
                     // System.out.print("*");
@@ -40,11 +63,10 @@ public class GameOfLife {
     static int[][] newGrid(int grid[][], int N) {
         int[][] newGeneration = new int[N][N];
 
-        // Loop through every cell
-        for (int i = 1; i < N - 1; i++) {
-            for (int j = 1; j < N - 1; j++) {
-                int aliveNeighbours = getNeighbors(grid, i, j);
-                aliveNeighbours -= grid[i][j];
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                int aliveNeighbours = getNeighbors(grid, i, j, N);
+                // aliveNeighbours -= grid[i][j];
 
                 if ((grid[i][j] == 1) && (aliveNeighbours < 2))
                     newGeneration[i][j] = 0;
@@ -64,7 +86,7 @@ public class GameOfLife {
     }
 
     static void runGame(int[][] grid, int N, int generationCounter) {
-        for (generationCounter = 1; generationCounter <= 5; generationCounter++) {
+        for (generationCounter = 1; generationCounter <= 2000; generationCounter++) {
             grid = newGrid(grid, N);
             printCurrentGeneration(grid, N, generationCounter);
         }
@@ -114,14 +136,16 @@ public class GameOfLife {
         int aliveCellsCounter = 0;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                if (grid[i][j] == 0)
-                    System.out.print(".");
+                if (grid[i][j] == 0){
+                    // System.out.print(".");
+                    continue;
+                }
                 else{
                     aliveCellsCounter++;
-                    System.out.print("*");
+                    // System.out.print("*");
                 }
             }
-            System.out.println();
+            // System.out.println();
         }
         System.out.println("Condição Inicial:" + aliveCellsCounter);
 
