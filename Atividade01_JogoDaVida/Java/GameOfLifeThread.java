@@ -6,7 +6,7 @@ public class GameOfLifeThread {
 
     public static void main(String[] args) {
         long startProgramTime = System.nanoTime();
-        int N = 50;
+        int N = 2048;
         int generationCounter = 0;
 
         int[][] grid = initialGrid(N);
@@ -60,53 +60,55 @@ public class GameOfLifeThread {
         System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter);
     }
 
-    static int[][] newGrid(int grid[][], int N, int generationCounter) {
+    static int[][] newGrid(int grid[][], int N) {
         int[][] newGeneration = new int[N][N];
         ArrayList<Thread> threads = new ArrayList<>();
-
+        
         long startLoopTime = System.nanoTime();
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                Integer thread_local_row = i;
-                Integer thread_local_column = j;
-                Thread t = new Thread(() -> {
-                    int aliveNeighbours = getNeighbors(grid, thread_local_row, thread_local_column, N);
-
-                    if ((grid[thread_local_row][thread_local_column] == 1) && (aliveNeighbours < 2))
-                        newGeneration[thread_local_row][thread_local_column] = 0;
-
-                    else if ((grid[thread_local_row][thread_local_column] == 1) && (aliveNeighbours > 3))
-                        newGeneration[thread_local_row][thread_local_column] = 0;
-
-                    else if ((grid[thread_local_row][thread_local_column] == 0) && (aliveNeighbours == 3))
-                        newGeneration[thread_local_row][thread_local_column] = 1;
-
-                    else
-                        newGeneration[thread_local_row][thread_local_column] = grid[thread_local_row][thread_local_column];
-                    printCurrentGeneration(grid, N, generationCounter);
-                });
-                t.start();
-                threads.add(t);
-                long endLoopTime = System.nanoTime();
-
-                long totalLoopTime = endLoopTime - startLoopTime;
-                System.out.println("LoopTime:" + totalLoopTime);
-            }
-
-            for (Thread t : threads)
-                try {
-                    t.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        
+        for(int t=0; t < 4; t++){
+            Thread tr = new Thread(()->{
+                for (int i = 0; i < N; i++) {
+                    for (int j = 0; j < N; j++) {
+                        int aliveNeighbours = getNeighbors(grid, i, j, N);
+        
+                        if ((grid[i][j] == 1) && (aliveNeighbours < 2))
+                            newGeneration[i][j] = 0;
+        
+                        else if ((grid[i][j] == 1) && (aliveNeighbours > 3))
+                            newGeneration[i][j] = 0;
+        
+                        else if ((grid[i][j] == 0) && (aliveNeighbours == 3))
+                            newGeneration[i][j] = 1;
+        
+                        else
+                            newGeneration[i][j] = grid[i][j];
+                    }
                 }
+            });
+            tr.start();
+            threads.add(tr);
         }
+        for (Thread t : threads){
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        long endLoopTime = System.nanoTime();
+
+        long totalLoopTime = endLoopTime - startLoopTime;
+        System.out.println("LoopTime:" + totalLoopTime);
 
         return newGeneration;
     }
 
     static void runGame(int[][] grid, int N, int generationCounter) {
-        for (generationCounter = 1; generationCounter <= 5; generationCounter++) {
-            grid = newGrid(grid, N, generationCounter);
+        for (generationCounter = 1; generationCounter <= 2000; generationCounter++) {
+            grid = newGrid(grid, N);
+            printCurrentGeneration(grid, N, generationCounter);
         }
     }
 
