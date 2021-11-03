@@ -98,6 +98,7 @@ public class GameOfLife {
     }
 
     static int[][] initialGrid(int N) {
+        int aliveCellsCounter = 0;
         int[][] grid = new int[N][N];
 
         for (int i = 0; i < N; i++) {
@@ -121,19 +122,8 @@ public class GameOfLife {
         grid[lin + 1][col] = 1;
         grid[lin + 1][col + 1] = 1;
         grid[lin + 2][col + 1] = 1;
+        aliveCellsCounter = 10;
 
-        System.out.println("Condição Inicial");
-        int aliveCellsCounter = 0;
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (grid[i][j] == 0){
-                    continue;
-                }
-                else{
-                    aliveCellsCounter++;
-                }
-            }
-        }
         System.out.println("Condição Inicial:" + aliveCellsCounter);
 
         return grid;
