@@ -4,21 +4,30 @@ import java.util.ArrayList;
 
 public class GameOfLifeThread {
 
-    public static void main(String[] args) {
-        long startProgramTime = System.nanoTime();
-        int N = 2048;
-        int generationCounter = 0;
+    int size = 2048;
+    int SUBSIZE = 50;
+    int[][] grid, newGrid;
+    int totalAlive = 0;
 
-        int[][] grid = initialGrid(N);
-        runGame(grid, N, generationCounter);
-        long endProgramTime = System.nanoTime();
-
-        long totalTime = endProgramTime - startProgramTime;
-        System.out.println("Tempo:" + totalTime);
+    public void freeGrids() {
+        grid = new int[size][size];
+        newGrid = new int[size][size];
     }
 
-    static int getNeighbors(int[][] grid, int i, int j, int N) {
-        int edge = N - 1;
+    public void print() {
+        int i = 0, j = 0;
+        for (i = 0; i < SUBSIZE; i++) {
+            for (j = 0; j < SUBSIZE; j++) {
+                System.out.println(grid[i][j]);
+            }
+            System.out.println();
+        }
+        System.out.println();
+        System.out.println();
+    }
+
+    public int neighborsAlive(int i, int j) {
+        int edge = size - 1;
         int count = 0;
 
         int a, b;
@@ -46,43 +55,34 @@ public class GameOfLifeThread {
         return count;
     }
 
-    static void printCurrentGeneration(int[][] newGeneration, int N, int generationCounter) {
-        int aliveCellsCounter = 0;
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (newGeneration[i][j] == 0) {
-                    continue;
-                } else {
-                    aliveCellsCounter++;
-                }
+    public int totalAlive() {
+        int i, j, count = 0;
+
+        for (i = 0; i < size; i++) {
+            for (j = 0; j < size; j++) {
+                count += grid[i][j];
             }
         }
-        System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter);
+
+        return count;
     }
 
-    static int[][] newGrid(int grid[][], int N) {
-        int[][] newGeneration = new int[N][N];
+    public int execute() {
+        // int i, j, 
         ArrayList<Thread> threads = new ArrayList<>();
-        
-        long startLoopTime = System.nanoTime();
-        
-        for(int t=0; t < 4; t++){
+        for(int t=0; t < 8; t++){
             Thread tr = new Thread(()->{
-                for (int i = 0; i < N; i++) {
-                    for (int j = 0; j < N; j++) {
-                        int aliveNeighbours = getNeighbors(grid, i, j, N);
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < size; j++) {
+                        int result = neighborsAlive(i, j);
         
-                        if ((grid[i][j] == 1) && (aliveNeighbours < 2))
-                            newGeneration[i][j] = 0;
+                        if (grid[i][j] == 0 && result == 3)
+                            newGrid[i][j] = 1;
         
-                        else if ((grid[i][j] == 1) && (aliveNeighbours > 3))
-                            newGeneration[i][j] = 0;
+                        else if (grid[i][j] == 1 && (result < 2 || result > 3))
+                            newGrid[i][j] = 0;
         
-                        else if ((grid[i][j] == 0) && (aliveNeighbours == 3))
-                            newGeneration[i][j] = 1;
-        
-                        else
-                            newGeneration[i][j] = grid[i][j];
+                            totalAlive += newGrid[i][j];
                     }
                 }
             });
@@ -96,51 +96,101 @@ public class GameOfLifeThread {
                 e.printStackTrace();
             }
         }
-
-        long endLoopTime = System.nanoTime();
-
-        long totalLoopTime = endLoopTime - startLoopTime;
-        System.out.println("LoopTime:" + totalLoopTime);
-
-        return newGeneration;
+        return totalAlive;
     }
 
-    static void runGame(int[][] grid, int N, int generationCounter) {
-        for (generationCounter = 1; generationCounter <= 2000; generationCounter++) {
-            grid = newGrid(grid, N);
-            printCurrentGeneration(grid, N, generationCounter);
-        }
-    }
+    public void createGrids() {
+        int i, j;
 
-    static int[][] initialGrid(int N) {
-        int aliveCellsCounter = 0;
-        int[][] grid = new int[N][N];
+        grid = new int[size][size];
+        newGrid = new int[size][size];
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
+        for (i = 0; i < size; i++) {
+            for (j = 0; j < size; j++) {
                 grid[i][j] = 0;
+                newGrid[i][j] = 0;
             }
         }
+    }
 
+    public void copyNewGridToGrid() {
+        int i, j;
+
+        for (i = 0; i < size; i++) {
+            for (j = 0; j < size; j++) {
+                grid[i][j] = newGrid[i][j];
+            }
+        }
+    }
+
+    public void initialize(int[][] matriz) {
         // GLIDER
         int lin = 1, col = 1;
-        grid[lin][col + 1] = 1;
-        grid[lin + 1][col + 2] = 1;
-        grid[lin + 2][col] = 1;
-        grid[lin + 2][col + 1] = 1;
-        grid[lin + 2][col + 2] = 1;
+        matriz[lin][col + 1] = 1;
+        matriz[lin + 1][col + 2] = 1;
+        matriz[lin + 2][col] = 1;
+        matriz[lin + 2][col + 1] = 1;
+        matriz[lin + 2][col + 2] = 1;
 
+        // R-pentomino
         lin = 10;
         col = 30;
-        grid[lin][col + 1] = 1;
-        grid[lin][col + 2] = 1;
-        grid[lin + 1][col] = 1;
-        grid[lin + 1][col + 1] = 1;
-        grid[lin + 2][col + 1] = 1;
-        aliveCellsCounter = 10;
+        matriz[lin][col + 1] = 1;
+        matriz[lin][col + 2] = 1;
+        matriz[lin + 1][col] = 1;
+        matriz[lin + 1][col + 1] = 1;
+        matriz[lin + 2][col + 1] = 1;
+    }
 
-        System.out.println("Condição Inicial:" + aliveCellsCounter);
+    public static void main(String[] args) {
 
-        return grid;
+        GameOfLife G = new GameOfLife();
+
+        int generations, n_threads;
+
+        generations = 2000;
+        n_threads = 2;
+
+        long startProgramTime = System.nanoTime();
+
+        System.out.println("\n**Game of Life**");
+        System.out.println("Matriz de tamanho " + G.size);
+        System.out.println("Número de gerações: " + generations);
+        System.out.println("Número de threads: " + n_threads);
+
+        G.createGrids();
+
+        G.initialize(G.grid);
+        G.initialize(G.newGrid);
+
+        int n = G.totalAlive();
+        System.out.println("Condição inicial: " + n);
+        System.out.println();
+
+        int i=0;
+        for (i = 0; i < generations; i++) {
+            long startLoopTime = System.nanoTime();
+
+            n = G.execute();
+            G.copyNewGridToGrid();
+
+            long endLoopTime = System.nanoTime();
+
+            long totalLoopTime = endLoopTime - startLoopTime;
+
+            System.out.println("Geração "+ i + ":" + n + " | Tempo de execução: x seg "+ totalLoopTime +" \n");
+
+            if (i < 5)
+                G.print();
+        }
+
+        System.out.println("\nÚltima geração (" + generations+ " iterações): " + n + "células vivas\n");
+
+        G.freeGrids();
+
+        long endProgramTime = System.nanoTime();
+
+        long totalProgramTime = endProgramTime - startProgramTime;
+        System.out.println("\nTempo total de execução: "+ totalProgramTime +" min\n");
     }
 }
