@@ -3,11 +3,16 @@ package Java;
 public class GameOfLife {
 
     public static void main(String[] args) {
+        long startProgramTime = System.nanoTime();
         int N = 2048;
         int generationCounter = 0;
 
         int[][] grid = initialGrid(N);
         runGame(grid, N, generationCounter);
+        long endProgramTime = System.nanoTime();
+
+        long totalTime = endProgramTime - startProgramTime;
+        System.out.println("Tempo:" + totalTime);
     }
 
     static int getNeighbors(int[][] grid, int i, int j, int N) {
@@ -59,6 +64,7 @@ public class GameOfLife {
     static int[][] newGrid(int grid[][], int N) {
         int[][] newGeneration = new int[N][N];
 
+        long startLoopTime = System.nanoTime();
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 int aliveNeighbours = getNeighbors(grid, i, j, N);
@@ -76,6 +82,10 @@ public class GameOfLife {
                     newGeneration[i][j] = grid[i][j];
             }
         }
+        long endLoopTime = System.nanoTime();
+
+        long totalLoopTime = endLoopTime - startLoopTime;
+        System.out.println("LoopTime:"+totalLoopTime);
 
         return newGeneration;
     }
