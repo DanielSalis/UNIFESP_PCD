@@ -15,9 +15,10 @@ public class GameOfLifeThread {
         int maxGenerations = 2000;
 
         int[][] grid = initialGrid(N);
+        
         runGame(grid, N, generationCounter, maxGenerations);
-        long endProgramTime = System.nanoTime();
 
+        long endProgramTime = System.nanoTime();
         long totalTime = endProgramTime - startProgramTime;
         System.out.println("Tempo total de execução:" + totalTime + "ns");
     }
@@ -116,10 +117,14 @@ public class GameOfLifeThread {
     }
 
     static void runGame(int[][] grid, int N, int generationCounter, int maxGenerations) {
+        long startGameTime = System.nanoTime();
         for (generationCounter = 1; generationCounter <= maxGenerations; generationCounter++) {
             grid = newGrid(grid, N, generationCounter);
             printCurrentGeneration(grid, N, generationCounter);
         }
+        long endGameTime = System.nanoTime();
+        long totalTime = endGameTime - startGameTime;
+        System.out.println("Tempo total de execução do Loop de gerações: " + totalTime + "ns");
     }
 
     static int[][] initialGrid(int N) {

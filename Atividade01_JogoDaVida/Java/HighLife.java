@@ -130,7 +130,7 @@ public class HighLife {
 
     public static void main(String[] args) {
 
-        GameOfLife G = new GameOfLife();
+        HighLife G = new HighLife();
 
         int generations, n_threads;
 
