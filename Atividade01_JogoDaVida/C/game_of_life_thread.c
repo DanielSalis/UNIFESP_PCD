@@ -186,7 +186,7 @@ int main(int argc, char **argv)
 
     omp_set_num_threads(n_threads);
 
-    struct timeval p_start, p_end, p_time, loop_start, loop_end, loop_time;
+    struct timeval p_start, p_end, p_time, generation_loop_start, generation_loop_end, generation_loop_time, loop_start, loop_end, loop_time;
     gettimeofday(&p_start, NULL);
 
     printf("\n**Game of Life**\n");
@@ -201,6 +201,8 @@ int main(int argc, char **argv)
 
     int n = totalAlive();
     printf("Condição inicial: %d\n\n", n);
+
+    gettimeofday(&generation_loop_start, NULL);
 
     int i;
     for (i = 0; i < generations; i++)
@@ -217,6 +219,10 @@ int main(int argc, char **argv)
 
         if (i < 5) print();
     }
+    gettimeofday(&generation_loop_end, NULL);
+    timersub(&generation_loop_end, &generation_loop_start, &generation_loop_time);
+    printf("\nTempo total de execução do Loop de gerações: %.3f min\n", SEC(generation_loop_time)/60);
+
 
     printf("\nÚltima geração (%d iterações): %d células vivas\n", generations, n);
 

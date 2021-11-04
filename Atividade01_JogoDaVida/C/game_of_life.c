@@ -7,7 +7,7 @@
 
 #define SIZE 2048
 #define SUBSIZE 50
-#define GENERATIONS 100
+#define GENERATIONS 2000
 
 /*
 (0,0)  (0,1)  (0,2)........
@@ -171,7 +171,7 @@ void initialize(int **matriz)
 
 int main()
 {
-    struct timeval p_start, p_end, p_time, loop_start, loop_end, loop_time;
+    struct timeval p_start, p_end, p_time, generation_loop_start, generation_loop_end, generation_loop_time, loop_start, loop_end, loop_time;
     gettimeofday(&p_start, NULL);
 
     printf("**Game of Life**\n");
@@ -182,6 +182,8 @@ int main()
 
     int n = totalAlive();
     printf("Condição inicial: %d\n", n);
+
+    gettimeofday(&generation_loop_start, NULL);
 
     int i;
     for (i = 0; i < GENERATIONS; i++)
@@ -198,6 +200,10 @@ int main()
 
         if (i < 5) print();
     }
+
+    gettimeofday(&generation_loop_end, NULL);
+    timersub(&generation_loop_end, &generation_loop_start, &generation_loop_time);
+    printf("\nTempo total de execução do Loop de gerações: %.3f min\n", SEC(generation_loop_time)/60);
 
     printf("\nÚltima geração (%d iterações): %d células vivas\n", GENERATIONS, n);
 
