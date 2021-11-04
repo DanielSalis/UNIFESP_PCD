@@ -4,7 +4,6 @@ package Java;
 public class GameOfLife {
     final static int aliveCellsCounter = 0;
     public static long currentTime;
-    public static int numberOfThreads = 8;
     public static int N = 2048;
 
     public static void main(String[] args) {
