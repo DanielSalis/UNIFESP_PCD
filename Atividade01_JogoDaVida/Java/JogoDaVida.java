@@ -12,7 +12,7 @@ class GameThread extends Thread {
     public int[][] nextMatrix;
     public int geracao;
 
-    public GameThread(int gcs, int gls,  int s, int e, int[][] pM, int[][] nM, int g) {
+    public GameThread(int gcs, int gls, int s, int e, int[][] pM, int[][] nM, int g) {
         this.start = s;
         this.end = e;
         this.prevMatrix = pM;
@@ -106,7 +106,7 @@ public class JogoDaVida {
     int[][] prevMatrix;
     int[][] nextMatrix;
 
-    public JogoDaVida(int mT, int c, int l, int g){
+    public JogoDaVida(int mT, int c, int l, int g) {
         this.maxThreads = mT; // 1, 2, 4, 8
         this.column = c;
         this.line = l;
@@ -202,11 +202,10 @@ public class JogoDaVida {
             }
             int vivosAtuais = getVivos(jogo.prevMatrix, jogo.line, jogo.column);
             long total_loop_time = (System.nanoTime() - startLoopTime) / 1000000;
-            System.out
-                    .println("Geração " + i + ": " + vivosAtuais + " | Tempo de execução: " + total_loop_time + "ms");
+            System.out.println("Geração " + i + ": " + vivosAtuais + " | Tempo de execução: " + total_loop_time + "ms");
         }
 
-        int vivos = getVivos(jogo.prevMatrix,  jogo.line, jogo.column);
+        int vivos = getVivos(jogo.prevMatrix, jogo.line, jogo.column);
         System.out.println("Última geração (" + jogo.generations + " iterações): " + vivos + " células vivas");
 
         long total_time = (System.currentTimeMillis() - startTime) / 1000;
