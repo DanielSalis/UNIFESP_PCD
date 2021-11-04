@@ -5,10 +5,14 @@ import java.util.ArrayList;
 public class GameOfLifeThread {
     final static int aliveCellsCounter = 0;
     public static long currentTime;
+    public static int numberOfThreads = 8;
+    public static int N = 50;
+    private int neighbors;
+    private int alive; // 0 is dead; 1 is alive.
+    
 
     public static void main(String[] args) {
         long startProgramTime = System.nanoTime();
-        int N = 50;
         int generationCounter = 0;
         int maxGenerations = 2000;
 
@@ -69,23 +73,27 @@ public class GameOfLifeThread {
 
         long startLoopTime = System.nanoTime();
 
-        for (int t = 0; t < 2; t++) {
-            Thread tr = new Thread(() -> {
-                for (int i = 0; i < N; i++) {
-                    for (int j = 0; j < N; j++) {
-                        int aliveNeighbours = getNeighbors(grid, i, j, N);
-
-                        if ((grid[i][j] == 1) && (aliveNeighbours < 2))
-                            newGeneration[i][j] = 0;
-
-                        else if ((grid[i][j] == 1) && (aliveNeighbours > 3))
-                            newGeneration[i][j] = 0;
-
-                        else if ((grid[i][j] == 0) && (aliveNeighbours == 3))
-                            newGeneration[i][j] = 1;
-
-                        else
-                            newGeneration[i][j] = grid[i][j];
+        for (int t = 0; t < numberOfThreads; t++) {
+            Integer thread_local_row_start = t * N / numberOfThreads;
+            Integer thread_local_row_end = (t + 1) * N / numberOfThreads;
+            Thread tr = new Thread(new Runnable() {
+                public void run(){
+                    for (int i = thread_local_row_start; i < thread_local_row_end; i++) {
+                        for (int j = 0; j < N; j++) {
+                            int aliveNeighbours = getNeighbors(grid, i, j, N);
+    
+                            if ((grid[i][j] == 1) && (aliveNeighbours < 2))
+                                newGeneration[i][j] = 0;
+    
+                            else if ((grid[i][j] == 1) && (aliveNeighbours > 3))
+                                newGeneration[i][j] = 0;
+    
+                            else if ((grid[i][j] == 0) && (aliveNeighbours == 3))
+                                newGeneration[i][j] = 1;
+    
+                            else
+                                newGeneration[i][j] = grid[i][j];
+                        }
                     }
                 }
             });
