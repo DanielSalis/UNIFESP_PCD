@@ -65,7 +65,7 @@ public class GameOfLifeThread {
         System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter +  "| Tempo: "+currentTime+ "ns");
     }
 
-    public static void evaluateCell(int[][] grid, int[][] newGeneration, int i, int j, int aliveNeighbours){
+    public static void applyConditions(int[][] grid, int[][] newGeneration, int i, int j, int aliveNeighbours){
         if ((grid[i][j] == 1) && (aliveNeighbours < 2))
         newGeneration[i][j] = 0;
 
@@ -93,7 +93,7 @@ public class GameOfLifeThread {
                     for (int i = thread_local_row_start; i < thread_local_row_end; i++) {
                         for (int j = 0; j < N; j++) {
                             int aliveNeighbours = getNeighbors(grid, i, j, N);
-                            evaluateCell(grid, newGeneration, i, j, aliveNeighbours);
+                            applyConditions(grid, newGeneration, i, j, aliveNeighbours);
                         }
                     }
                 }
