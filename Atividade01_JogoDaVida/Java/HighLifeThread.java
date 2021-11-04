@@ -1,10 +1,13 @@
 package Java;
 
+import java.util.ArrayList;
 
-public class HighLife {
+public class HighLifeThread {
     final static int aliveCellsCounter = 0;
     public static long currentTime;
+    public static int numberOfThreads = 8;
     public static int N = 2048;
+    
 
     public static void main(String[] args) {
         long startProgramTime = System.nanoTime();
@@ -12,7 +15,7 @@ public class HighLife {
         int maxGenerations = 2000;
 
         int[][] grid = initialGrid(N);
-
+        
         runGame(grid, N, generationCounter, maxGenerations);
 
         long endProgramTime = System.nanoTime();
@@ -60,34 +63,53 @@ public class HighLife {
                 }
             }
         }
-        System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter + "| Tempo: " + currentTime + "ns");
+        System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter +  "| Tempo: "+currentTime+ "ns");
     }
 
-    public static void applyConditions(int[][] grid, int[][] newGeneration, int i, int j, int aliveNeighbours) {
+    public static void applyConditions(int[][] grid, int[][] newGeneration, int i, int j, int aliveNeighbours){
         if ((grid[i][j] == 1) && (aliveNeighbours < 2))
-            newGeneration[i][j] = 0;
+        newGeneration[i][j] = 0;
 
-        else if ((grid[i][j] == 1) && (aliveNeighbours > 3))
-            newGeneration[i][j] = 0;
+    else if ((grid[i][j] == 1) && (aliveNeighbours > 3))
+        newGeneration[i][j] = 0;
 
-        else if ((grid[i][j] == 0) && (aliveNeighbours == 3 || aliveNeighbours == 6))
-            newGeneration[i][j] = 1;
+    else if ((grid[i][j] == 0) && (aliveNeighbours == 3 || aliveNeighbours == 6))
+        newGeneration[i][j] = 1;
 
-        else
-            newGeneration[i][j] = grid[i][j];
+    else
+        newGeneration[i][j] = grid[i][j];
     }
 
     static int[][] newGrid(int grid[][], int N, int generation) {
         int[][] newGeneration = new int[N][N];
+        ArrayList<Thread> threads = new ArrayList<>();
 
         long startLoopTime = System.nanoTime();
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                int aliveNeighbours = getNeighbors(grid, i, j, N);
-                applyConditions(grid, newGeneration, i, j, aliveNeighbours);
+        for (int t = 0; t < numberOfThreads; t++) {
+            Integer thread_local_row_start = t * N / numberOfThreads;
+            Integer thread_local_row_end = (t + 1) * N / numberOfThreads;
+            Thread tr = new Thread(new Runnable() {
+                public void run(){
+                    for (int i = thread_local_row_start; i < thread_local_row_end; i++) {
+                        for (int j = 0; j < N; j++) {
+                            int aliveNeighbours = getNeighbors(grid, i, j, N);
+                            applyConditions(grid, newGeneration, i, j, aliveNeighbours);
+                        }
+                    }
+                }
+            });
+            tr.start();
+            threads.add(tr);
+        }
+        for (Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
+
         long endLoopTime = System.nanoTime();
 
         currentTime = endLoopTime - startLoopTime;
