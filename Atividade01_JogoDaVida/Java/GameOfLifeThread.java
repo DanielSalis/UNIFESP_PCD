@@ -3,18 +3,21 @@ package Java;
 import java.util.ArrayList;
 
 public class GameOfLifeThread {
+    final static int aliveCellsCounter = 0;
+    public static long currentTime;
 
     public static void main(String[] args) {
         long startProgramTime = System.nanoTime();
-        int N = 2048;
+        int N = 50;
         int generationCounter = 0;
+        int maxGenerations = 2000;
 
         int[][] grid = initialGrid(N);
-        runGame(grid, N, generationCounter);
+        runGame(grid, N, generationCounter, maxGenerations);
         long endProgramTime = System.nanoTime();
 
         long totalTime = endProgramTime - startProgramTime;
-        System.out.println("Tempo:" + totalTime);
+        System.out.println("Tempo total de execução:" + totalTime + "ns");
     }
 
     static int getNeighbors(int[][] grid, int i, int j, int N) {
@@ -57,16 +60,16 @@ public class GameOfLifeThread {
                 }
             }
         }
-        System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter);
+        System.out.println("Geração" + generationCounter + ":" + aliveCellsCounter +  "| Tempo: "+currentTime+ "ns");
     }
 
-    static int[][] newGrid(int grid[][], int N) {
+    static int[][] newGrid(int grid[][], int N, int generation) {
         int[][] newGeneration = new int[N][N];
         ArrayList<Thread> threads = new ArrayList<>();
 
         long startLoopTime = System.nanoTime();
 
-        for (int t = 0; t < 4; t++) {
+        for (int t = 0; t < 2; t++) {
             Thread tr = new Thread(() -> {
                 for (int i = 0; i < N; i++) {
                     for (int j = 0; j < N; j++) {
@@ -99,15 +102,13 @@ public class GameOfLifeThread {
 
         long endLoopTime = System.nanoTime();
 
-        long totalLoopTime = endLoopTime - startLoopTime;
-        System.out.println("LoopTime:" + totalLoopTime);
-
+        currentTime = endLoopTime - startLoopTime;
         return newGeneration;
     }
 
-    static void runGame(int[][] grid, int N, int generationCounter) {
-        for (generationCounter = 1; generationCounter <= 2000; generationCounter++) {
-            grid = newGrid(grid, N);
+    static void runGame(int[][] grid, int N, int generationCounter, int maxGenerations) {
+        for (generationCounter = 1; generationCounter <= maxGenerations; generationCounter++) {
+            grid = newGrid(grid, N, generationCounter);
             printCurrentGeneration(grid, N, generationCounter);
         }
     }
