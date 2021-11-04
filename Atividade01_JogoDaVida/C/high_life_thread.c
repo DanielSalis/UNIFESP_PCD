@@ -96,6 +96,7 @@ int totalAlive()
 int execute()
 {
     int i, j, totalAlive = 0;;
+    #pragma omp parallel for reduction(+:totalAlive) private(i, j)
 
     for (i = 0; i < size; i++)
     {
