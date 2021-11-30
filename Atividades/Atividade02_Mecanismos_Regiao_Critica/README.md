@@ -6,6 +6,9 @@
 
 * Para executar ```./exercicio01.out```
 
+* Para compilar ```gcc  exercicio01_caotic.c -fopenmp -o exercicio01_caotic.out``` 
+
+* Para Executar ```./exercicio01_caotic.out```
 ### Exercício 02
 
 * Para compilar, ex:
