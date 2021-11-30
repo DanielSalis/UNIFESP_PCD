@@ -1,6 +1,6 @@
 public class TrafficControllerSync {
 
-    private boolean isBridgeFree = false;
+    private boolean isBridgeFree = true;
 
     public void SetBridgeState(boolean value) {
         this.isBridgeFree = value;
@@ -11,7 +11,7 @@ public class TrafficControllerSync {
     }
 
     public synchronized void crossBridge() {
-        while (this.GetBridgeState() == true) {
+        while (this.GetBridgeState() == false) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -19,12 +19,12 @@ public class TrafficControllerSync {
                 break;
             }
         }
-        isBridgeFree = true;
+        SetBridgeState(false);
         notifyAll();
     }
 
     public synchronized void exitBridge() {
-        this.SetBridgeState(false);
+        this.SetBridgeState(true);
         notifyAll();
     }
 
