@@ -21,9 +21,9 @@ public class Car implements Runnable{
     int xpos, ypos; 
     Car inFront;
     Image image;
-    TrafficController controller;
+    TrafficControllerSync controller;
 
-    public Car(int cartype,Car inFront, Image image, TrafficController controller) {
+    public Car(int cartype,Car inFront, Image image, TrafficControllerSync controller) {
 	this.cartype = cartype;
 	this.inFront = inFront;
         this.image = image;

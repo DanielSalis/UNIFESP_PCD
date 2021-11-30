@@ -1,4 +1,4 @@
-public class TrafficController {
+public class TrafficController_OLD {
 
     public void enterLeft() {}
     public void enterRight() {}

@@ -8,13 +8,13 @@ class CarWorld extends JPanel {
     Image redCar;
     Image blueCar;
 
-    TrafficController controller;
+    TrafficControllerSync controller;
 
     ArrayList<Car> blueCars = new ArrayList<Car>();
     ArrayList<Car> redCars = new ArrayList<Car>();
 
     public CarWorld() {
-	controller = new TrafficController();
+	controller = new TrafficControllerSync();
         MediaTracker mt = new MediaTracker(this);
 	Toolkit toolkit = Toolkit.getDefaultToolkit();
 
