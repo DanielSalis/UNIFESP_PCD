@@ -1,0 +1,46 @@
+**Game of Life**
+Matriz de tamanho 8192
+Número de gerações: 50
+Número de threads: 1
+
+Última geração (50 iterações): 55 células vivas
+
+Tempo total de execução da somatória: 0.0300 seg
+
+Tempo total de execução: 36.3900 seg
+
+---------------------------
+
+Matriz de tamanho 8192
+Número de gerações: 50
+Número de threads: 2
+
+Última geração (50 iterações): 55 células vivas
+
+Tempo total de execução da somatória: 0.0285 seg
+
+Tempo total de execução: 23.9537 seg
+
+---------------------------
+
+Matriz de tamanho 8192
+Número de gerações: 50
+Número de threads: 4
+
+Última geração (50 iterações): 55 células vivas
+
+Tempo total de execução da somatória: 0.0274 seg
+
+Tempo total de execução: 21.3328 seg
+
+---------------------------
+
+Matriz de tamanho 8192
+Número de gerações: 50
+Número de threads: 8
+
+Última geração (50 iterações): 55 células vivas
+
+Tempo total de execução da somatória: 0.0305 seg
+
+Tempo total de execução: 24.9131 seg
