@@ -10,7 +10,7 @@
 
 * Para compilar, ex:
 ```
-gcc game_of_life_reduction.c -fopenmp 03 -o game_of_life_reduction.out
+gcc game_of_life_reduction.c -fopenmp -O3 -o game_of_life_reduction.out
 ```
 
 * Para executar, ex:

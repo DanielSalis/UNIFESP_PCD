@@ -153,15 +153,15 @@ int main(int argc, char **argv)
     }
 
     int generations, n_threads;
+    struct timeval p_start, p_end, p_time;
+
+    gettimeofday(&p_start, NULL);
 
     size = atoi(argv[1]);
     generations = atoi(argv[2]);
     n_threads = atoi(argv[3]);
 
     omp_set_num_threads(n_threads);
-
-    struct timeval p_start, p_end, p_time, count_loop_start, count_loop_end, count_loop_time;
-    gettimeofday(&p_start, NULL);
 
     printf("\n**Game of Life**\n");
     printf("Matriz de tamanho %d\n", size);
@@ -173,6 +173,9 @@ int main(int argc, char **argv)
     initialize(grid);
     initialize(newGrid);
 
+    struct timeval parallel_start, parallel_end, parallel_time, count_loop_start, count_loop_end, count_loop_time;
+    gettimeofday(&parallel_start, NULL);
+
     int i;
     for (i = 0; i < generations; i++)
     {
@@ -180,15 +183,21 @@ int main(int argc, char **argv)
         copyNewGridToGrid();
     }
 
-    //contabiliza células vivas da última geração
     gettimeofday(&count_loop_start, NULL);
+
+    //contabiliza células vivas da última geração
     int n = totalAlive();
-    gettimeofday(&count_loop_end, NULL);
 
     printf("\nÚltima geração (%d iterações): %d células vivas\n", generations, n);
+    gettimeofday(&count_loop_end, NULL);
+
+    gettimeofday(&parallel_end, NULL);
 
     timersub(&count_loop_end, &count_loop_start, &count_loop_time);
-    printf("\nTempo total de execução da somatória: %.4f seg\n", SEC(count_loop_time));
+    printf("\nTempo da última somatória: %.4f seg\n", SEC(count_loop_time));
+
+    timersub(&parallel_end, &parallel_start, &parallel_time);
+    printf("\nTempo da região paralela: %.4f seg\n", SEC(parallel_time));
 
     freeGrids();
 
