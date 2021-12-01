@@ -2,10 +2,13 @@
 
 ### Exercício 01
 
-* Para compilar: ```gcc  -fopenmp -03  exercicio01.c -o exercicio01.out```
+* Para compilar: ```gcc exercicio01.c -o exercicio01.out```
 
-* Para executar ```./exercicio01.out <number_of_threads>```
+* Para executar ```./exercicio01.out```
 
+* Para compilar ```gcc  exercicio01_caotic.c -fopenmp -o exercicio01_caotic.out``` 
+
+* Para Executar ```./exercicio01_caotic.out```
 ### Exercício 02
 
 * Para compilar, ex:
