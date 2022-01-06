@@ -1,0 +1,28 @@
+**Game of Life**
+Matriz de tamanho 2048
+Número de gerações: 2000
+
+Última geração (2000 iterações): 51 células vivas
+
+
+Número de processos: 1
+
+Tempo total de execução: 61.8226 seg
+
+---------------------------
+
+Número de processos: 2
+
+Tempo total de execução: 41.0996 seg
+
+---------------------------
+
+Número de processos: 4
+
+Tempo total de execução: 62.3935 seg
+
+---------------------------
+
+Número de threads: 8
+
+Tempo total de execução: 234.3490 seg
