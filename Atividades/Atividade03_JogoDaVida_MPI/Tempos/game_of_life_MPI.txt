@@ -1,0 +1,11 @@
+Número de processos1:
+Tempo total de execução: 39.2627 seg
+
+Número de processos:2
+Tempo total de execução: 23.8270 seg
+
+Número de processos:4
+Tempo total de execução: 16.7154 seg
+
+Número de processos:8
+Tempo total de execução: 27.8969 seg
