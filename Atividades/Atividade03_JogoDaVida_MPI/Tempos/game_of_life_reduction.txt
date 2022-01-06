@@ -1,0 +1,11 @@
+N processos 1:
+Tempo total de execução: 51.7520 seg
+
+N threads 2:
+Tempo total de execução: 30.2897 seg
+
+N threads 4:
+Tempo total de execução: 21.3181 seg
+
+N threads 8
+Tempo total de execução: 24.6476 seg
