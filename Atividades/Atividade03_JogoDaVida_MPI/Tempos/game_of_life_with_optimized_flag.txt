@@ -1,0 +1,11 @@
+N threads 1
+Tempo total de execução: 1.414 min
+
+N threads 2
+Tempo total de execução: 0.860 min
+
+N threads 4
+Tempo total de execução: 0.654 min
+
+N threads 8
+Tempo total de execução: 0.718 min
