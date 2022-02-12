@@ -1,84 +1,72 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 #include <mpi.h>
-
-// nome do arquivo
-#define FILENAME "MOCK_DATA_100000.csv"
-
-// total de linhas
-#define ROWS 100000
-
-// total de colunas
-#define COLUMNS 3
-
-// indice da coluna que será baseada para fazer os cálculos
-#define K 2
-
-void read_csv(double **data, int num_procs, int proc_id, int subsize)
+typedef struct
 {
-	FILE *file;
-	file = fopen(FILENAME, "r");
+	float sum;
+	float min;
+	float max;
+} FileResult;
 
-	float menor = ROWS, maior = 0, media = 0, soma = 0;
-	float soma_total = 0;
+FileResult read_csv(char *filename, int proc_id, int subsize)
+{
+	int K = 0;
+	float sum=0, min, max;
 
-	float *maxTot = (float *)malloc(num_procs * sizeof(float));
-	float *minTot = (float *)malloc(num_procs * sizeof(float));
+	double **data = (double **)malloc(subsize * sizeof(double *));
+	for (int l = 0; l < subsize; l++)
+	{
+		data[l] = (double *)malloc(sizeof(double));
+	}
+
+	FILE *file = fopen(filename, "r");
 
 	int i = proc_id * subsize;
-	int max = i + subsize;
+	int max_i = i + subsize;
 
 	char line[4098];
 
-	maxTot[proc_id] = 0;
-	minTot[proc_id] = ROWS;
-
-	while (fgets(line, 4098, file) && (i < max))
+	while (fgets(line, 4098, file) && (i < max_i))
 	{
+		int pos = i % subsize;
 		char *tmp = strdup(line);
 
 		int j = 0;
 		const char *tok;
-		for (tok = strtok(line, ","); tok && *tok; j++, tok = strtok(NULL, ","))
+		tok = strtok(line, ",");
+		while (tok && *tok)
 		{
-			data[i][j] = atof(tok);
+			data[pos] = (double *)realloc(data[pos], (j + 1) * sizeof(double));
+			data[pos][j] = atof(tok);
+			j++;
+			tok = strtok(NULL, ",");
 		}
 
-		if (data[i][K] > maxTot[proc_id])
-			maxTot[proc_id] = data[i][K];
+		if (data[pos][K] > max)
+			max = data[pos][K];
 
-		if (data[i][K] < minTot[proc_id])
-			minTot[proc_id] = data[i][K];
+		if (data[pos][K] < min)
+			min = data[pos][K];
 
-		soma += data[i][K];
+		sum += data[pos][K];
 
 		free(tmp);
 		i++;
 	}
 
-	MPI_Barrier(MPI_COMM_WORLD);
+	FileResult result;
+	result.min = min;
+	result.max = max;
+	result.sum = sum;
 
-	printf("Soma: %.2f \n", soma);
-
-	MPI_Reduce(&soma, &soma_total, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
-	MPI_Reduce(&minTot[proc_id], &menor, 1, MPI_FLOAT, MPI_MIN, 0, MPI_COMM_WORLD);
-	MPI_Reduce(&maxTot[proc_id], &maior, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
-
-	if (proc_id == 0)
-	{
-		media = soma_total / (ROWS - 1);
-
-		printf("Soma total: %.2f \n", soma_total);
-		printf("Media: %.2f\n", media);
-		printf("Menor: %.2f\n", menor);
-		printf("Maior: %.2f\n", maior);
-	}
+	return result;
 }
 
 int main(int argc, char *argv[])
 {
-	int num_procs, proc_id, ferr;
+	int num_procs, proc_id, ferr, i;
 	double start, finish;
 
 	int ierr = MPI_Init(&argc, &argv);
@@ -86,31 +74,107 @@ int main(int argc, char *argv[])
 	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &proc_id);
 
-	int subsize = ROWS / num_procs;
-	int rest = ROWS % num_procs;
-
-	if (proc_id == num_procs - 1)
-	{
-		subsize += rest;
-	}
-
-	printf("size proc_id %d = %d\n", proc_id, subsize);
-
-	MPI_Barrier(MPI_COMM_WORLD);
+	int n_files = 0;
+	char **filenames = (char **)malloc(sizeof(char *));
+	int *filename_sizes = (int *)malloc(sizeof(int));
+	float *file_rows = (float *)malloc(sizeof(float));
 
 	if (proc_id == 0)
 	{
 		start = MPI_Wtime();
+
+		DIR *folder;
+		struct dirent *entry;
+
+		folder = opendir(".");
+		if (folder == NULL)
+		{
+			perror("Unable to read directory");
+			return 0;
+		}
+
+		while ((entry = readdir(folder)))
+		{
+			char *ext = strrchr(entry->d_name, '.');
+			if (ext && strcmp(ext + 1, "csv") == 0)
+			{
+				n_files++;
+				filenames = (char **)realloc(filenames, n_files * sizeof(char *));
+				filenames[n_files - 1] = entry->d_name;
+
+				filename_sizes = (int *)realloc(filename_sizes, n_files * sizeof(int));
+				filename_sizes[n_files - 1] = strlen(filenames[n_files - 1]);
+
+				printf("Arquivo %3d: %s \n", n_files, filenames[n_files - 1]);
+				fflush(stdout);
+			}
+		}
+
+		closedir(folder);
+
+		file_rows = (float *)malloc(n_files * sizeof(float));
+		for (i = 0; i < n_files; i++)
+		{
+			printf("Qtd de linhas do arquivo %s: ", filenames[i]);
+			fflush(stdout);
+			scanf("%f", &file_rows[i]);
+		}
 	}
 
-	double **data;
-	data = (double **)malloc(ROWS * sizeof(double *));
-	for (int i = 0; i < ROWS; i++)
+	MPI_Bcast(&n_files, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(file_rows, n_files, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(filename_sizes, n_files, MPI_INT, 0, MPI_COMM_WORLD);
+	for (i = 0; i < n_files; i++)
 	{
-		data[i] = (double *)malloc(COLUMNS * sizeof(double));
+		MPI_Bcast(filenames[i], filename_sizes[i], MPI_CHAR, 0, MPI_COMM_WORLD);
 	}
 
-	read_csv(data, num_procs, proc_id, subsize);
+	float min, max, total_sum = 0;
+
+	for (i = 0; i < n_files; i++)
+	{
+		int rows = file_rows[i];
+		int subsize = rows / num_procs;
+		int rest = rows % num_procs;
+
+		if (proc_id == num_procs - 1)
+		{
+			subsize += rest;
+		}
+
+		if (proc_id == 0)
+		{
+			printf("\nArquivo %s: \n", filenames[i]);
+			fflush(stdout);
+		}
+		FileResult result = read_csv(filenames[i], proc_id, subsize);
+
+		printf("result.sum %f\n", result.sum);
+		// printf("result.min %f\n", result.min);
+		// printf("result.max %f\n", result.max);
+		fflush(stdout);
+
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		MPI_Reduce(&result.sum, &total_sum, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+		MPI_Reduce(&result.min, &min, 1, MPI_FLOAT, MPI_MIN, 0, MPI_COMM_WORLD);
+		MPI_Reduce(&result.max, &max, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
+
+
+		if (proc_id == 0)
+		{
+			float media = total_sum / rows;
+
+			printf("Soma total: %.2f \n", total_sum);
+			printf("Media: %.2f\n", media);
+			printf("Menor: %.2f\n", min);
+			printf("Maior: %.2f\n\n", max);
+			fflush(stdout);
+		}
+
+		MPI_Barrier(MPI_COMM_WORLD);
+		fflush(stdout);
+	}
 
 	if (proc_id == 0)
 	{
@@ -120,5 +184,5 @@ int main(int argc, char *argv[])
 
 	ferr = MPI_Finalize();
 
-	return 0;
+	return 1;
 }
