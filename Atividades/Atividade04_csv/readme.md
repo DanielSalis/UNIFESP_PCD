@@ -13,12 +13,12 @@ sudo apt-get install libcr-dev mpich2 mpich2-doc
 
 * Para compilar:
 ```
-mpicc read_MPI.c -o read_MPI -O3
+mpicc read_MPI_group.c -o read_MPI_group.out -O3
 ```
 
 * Para executar:
 ```
-mpiexec -np <NP> ./read_MPI
+mpiexec -np <NP> ./read_MPI_group.out
 ```
 
 NP = número de processos
