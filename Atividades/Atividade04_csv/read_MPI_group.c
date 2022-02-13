@@ -117,83 +117,9 @@ int **read_file(char *filename, int rows)
 	return data;
 }
 
-int main(int argc, char *argv[])
+void process(int *file_rows, char **filenames, int n_files, int proc_id, int num_procs)
 {
-	int num_procs, proc_id, ferr, i, j;
-	double start, finish;
-
-	int ierr = MPI_Init(&argc, &argv);
-
-	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &proc_id);
-
-	int n_files = 0;
-	char **filenames = (char **)malloc(sizeof(char *));
-	int *filename_sizes = (int *)malloc(sizeof(int));
-	int *file_rows = (int *)malloc(sizeof(int));
-
-	if (proc_id == 0)
-	{
-		DIR *folder;
-		struct dirent *entry;
-
-		folder = opendir(".");
-		if (folder == NULL)
-		{
-			perror("Unable to read directory");
-			return 0;
-		}
-
-		while ((entry = readdir(folder)))
-		{
-			char *ext = strrchr(entry->d_name, '.');
-			if (ext && strcmp(ext + 1, "csv") == 0)
-			{
-				n_files++;
-				if (n_files > 1)
-				{
-					filenames = (char **)realloc(filenames, n_files * sizeof(char *));
-				}
-				filenames[n_files - 1] = strdup(entry->d_name);
-
-				printf("Arquivo %3d: %s \n", n_files, filenames[n_files - 1]);
-				fflush(stdout);
-			}
-		}
-
-		closedir(folder);
-
-		file_rows = (int *)malloc(n_files * sizeof(int));
-		// filename_sizes = (int *)malloc(n_files * sizeof(int));
-		for (i = 0; i < n_files; i++)
-		{
-			printf("Qtd de linhas do arquivo %s: ", filenames[i]);
-			fflush(stdout);
-			scanf("%d", &file_rows[i]);
-
-			// filename_sizes[i] = strlen(filenames[i]) + 1;
-		}
-	}
-
-	if (proc_id == 0)
-	{
-		start = MPI_Wtime();
-	}
-
-	MPI_Bcast(&n_files, 1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(file_rows, n_files, MPI_INT, 0, MPI_COMM_WORLD);
-	// MPI_Bcast(filename_sizes, n_files, MPI_INT, 0, MPI_COMM_WORLD);
-
-	// for (i = 0; i < n_files; i++)
-	// {
-	// 	if (proc_id != 0)
-	// 	{
-	// 		filenames[i] = (char *)malloc(filename_sizes[i] * sizeof(char));
-	// 	}
-
-	// 	MPI_Bcast(&filenames[i], filename_sizes[i], MPI_CHAR, 0, MPI_COMM_WORLD);
-	// }
-
+	int i, j;
 	for (i = 0; i < n_files; i++)
 	{
 		int rows = file_rows[i];
@@ -256,6 +182,71 @@ int main(int argc, char *argv[])
 		MPI_Barrier(MPI_COMM_WORLD);
 		fflush(stdout);
 	}
+}
+
+int main(int argc, char *argv[])
+{
+	int num_procs, proc_id, ferr, i, j;
+	double start, finish;
+
+	int ierr = MPI_Init(&argc, &argv);
+
+	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &proc_id);
+
+	int n_files = 0;
+	char **filenames = (char **)malloc(sizeof(char *));
+	int *file_rows = (int *)malloc(sizeof(int));
+
+	if (proc_id == 0)
+	{
+		DIR *folder;
+		struct dirent *entry;
+
+		folder = opendir(".");
+		if (folder == NULL)
+		{
+			perror("Unable to read directory");
+			return 0;
+		}
+
+		while ((entry = readdir(folder)))
+		{
+			char *ext = strrchr(entry->d_name, '.');
+			if (ext && strcmp(ext + 1, "csv") == 0)
+			{
+				n_files++;
+				if (n_files > 1)
+				{
+					filenames = (char **)realloc(filenames, n_files * sizeof(char *));
+				}
+				filenames[n_files - 1] = strdup(entry->d_name);
+
+				printf("Arquivo %3d: %s \n", n_files, filenames[n_files - 1]);
+				fflush(stdout);
+			}
+		}
+
+		closedir(folder);
+
+		file_rows = (int *)malloc(n_files * sizeof(int));
+		for (i = 0; i < n_files; i++)
+		{
+			printf("Qtd de linhas do arquivo %s: ", filenames[i]);
+			fflush(stdout);
+			scanf("%d", &file_rows[i]);
+		}
+	}
+
+	if (proc_id == 0)
+	{
+		start = MPI_Wtime();
+	}
+
+	MPI_Bcast(&n_files, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(file_rows, n_files, MPI_INT, 0, MPI_COMM_WORLD);
+
+	process(file_rows, filenames, n_files, proc_id, num_procs);
 
 	if (proc_id == 0)
 	{
@@ -264,7 +255,6 @@ int main(int argc, char *argv[])
 	}
 
 	free(filenames);
-	free(filename_sizes);
 	free(file_rows);
 
 	ferr = MPI_Finalize();
