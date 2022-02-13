@@ -3,6 +3,8 @@
 #include <string.h>
 #include <dirent.h>
 #include <mpi.h>
+#include <math.h>
+
 typedef struct
 {
 	float sum;
@@ -10,50 +12,27 @@ typedef struct
 	float max;
 } FileResult;
 
-FileResult read_csv(char *filename, int proc_id, int subsize)
+FileResult read_csv(double *data, int proc_id, int subsize, int num_procs, int rows)
 {
 	int K = 0;
-	float sum=0, min, max;
-
-	double **data = (double **)malloc(subsize * sizeof(double *));
-	for (int l = 0; l < subsize; l++)
-	{
-		data[l] = (double *)malloc(sizeof(double));
-	}
-
-	FILE *file = fopen(filename, "r");
+	float sum = 0, min = 10000, max = 0;
 
 	int i = proc_id * subsize;
-	int max_i = i + subsize;
+	int max_i;
+	if (proc_id == num_procs - 1)
+		max_i = rows - i;
+	else
+		max_i = floor((float)rows / num_procs);
 
-	char line[4098];
-
-	while (fgets(line, 4098, file) && (i < max_i))
+	for (int l = i; l < i + max_i; l++)
 	{
-		int pos = i % subsize;
-		char *tmp = strdup(line);
+		if (data[l] > max)
+			max = data[l];
 
-		int j = 0;
-		const char *tok;
-		tok = strtok(line, ",");
-		while (tok && *tok)
-		{
-			data[pos] = (double *)realloc(data[pos], (j + 1) * sizeof(double));
-			data[pos][j] = atof(tok);
-			j++;
-			tok = strtok(NULL, ",");
-		}
+		if (data[l] < min)
+			min = data[l];
 
-		if (data[pos][K] > max)
-			max = data[pos][K];
-
-		if (data[pos][K] < min)
-			min = data[pos][K];
-
-		sum += data[pos][K];
-
-		free(tmp);
-		i++;
+		sum += data[l];
 	}
 
 	FileResult result;
@@ -64,9 +43,31 @@ FileResult read_csv(char *filename, int proc_id, int subsize)
 	return result;
 }
 
+double *read_file(char *filename, int rows)
+{
+	double *data = (double *)malloc(rows * sizeof(double));
+	FILE *fp = fopen(filename, "r");
+
+	char line[4098];
+	int i = 0;
+	while (fgets(line, 4098, fp))
+	{
+		int j = 0;
+		const char *tok;
+		tok = strtok(line, ",");
+		data[i] = atof(tok);
+
+		i++;
+	}
+
+	fclose(fp);
+
+	return data;
+}
+
 int main(int argc, char *argv[])
 {
-	int num_procs, proc_id, ferr, i;
+	int num_procs, proc_id, ferr, i, j;
 	double start, finish;
 
 	int ierr = MPI_Init(&argc, &argv);
@@ -134,32 +135,28 @@ int main(int argc, char *argv[])
 	for (i = 0; i < n_files; i++)
 	{
 		int rows = file_rows[i];
-		int subsize = rows / num_procs;
-		int rest = rows % num_procs;
 
-		if (proc_id == num_procs - 1)
-		{
-			subsize += rest;
-		}
+		double *data = (double *)malloc(rows * sizeof(double));
 
 		if (proc_id == 0)
 		{
 			printf("\nArquivo %s: \n", filenames[i]);
 			fflush(stdout);
+
+			data = read_file(filenames[i], rows);
 		}
-		FileResult result = read_csv(filenames[i], proc_id, subsize);
 
-		printf("result.sum %f\n", result.sum);
-		// printf("result.min %f\n", result.min);
-		// printf("result.max %f\n", result.max);
-		fflush(stdout);
+		MPI_Bcast(data, rows, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-		MPI_Barrier(MPI_COMM_WORLD);
+		int subsize = rows / num_procs;
+		FileResult result = read_csv(data, proc_id, subsize, num_procs, rows);
+		free(data);
 
 		MPI_Reduce(&result.sum, &total_sum, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
 		MPI_Reduce(&result.min, &min, 1, MPI_FLOAT, MPI_MIN, 0, MPI_COMM_WORLD);
 		MPI_Reduce(&result.max, &max, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
 
+		MPI_Barrier(MPI_COMM_WORLD);
 
 		if (proc_id == 0)
 		{
@@ -181,6 +178,10 @@ int main(int argc, char *argv[])
 		finish = MPI_Wtime();
 		printf("\nTempo total de execução: %.4f seg\n", finish - start);
 	}
+
+	free(filenames);
+	free(filename_sizes);
+	free(file_rows);
 
 	ferr = MPI_Finalize();
 
