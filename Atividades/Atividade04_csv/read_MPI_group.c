@@ -100,7 +100,9 @@ int **read_file(char *filename, int rows)
 		tok = strtok(line, ",");
 		while (tok && *tok)
 		{
-			data[i] = (int *)realloc(data[i], (j + 1) * sizeof(int));
+			if (j > 1)
+				data[i] = (int *)realloc(data[i], (j + 1) * sizeof(int));
+
 			data[i][j] = atof(tok);
 
 			j++;
@@ -148,8 +150,11 @@ int main(int argc, char *argv[])
 			if (ext && strcmp(ext + 1, "csv") == 0)
 			{
 				n_files++;
-				filenames = (char **)realloc(filenames, n_files * sizeof(char *));
-				filenames[n_files - 1] = entry->d_name;
+				if (n_files > 1)
+				{
+					filenames = (char **)realloc(filenames, n_files * sizeof(char *));
+				}
+				filenames[n_files - 1] = strdup(entry->d_name);
 
 				printf("Arquivo %3d: %s \n", n_files, filenames[n_files - 1]);
 				fflush(stdout);
@@ -159,14 +164,14 @@ int main(int argc, char *argv[])
 		closedir(folder);
 
 		file_rows = (int *)malloc(n_files * sizeof(int));
-		filename_sizes = (int *)malloc(n_files * sizeof(int));
+		// filename_sizes = (int *)malloc(n_files * sizeof(int));
 		for (i = 0; i < n_files; i++)
 		{
 			printf("Qtd de linhas do arquivo %s: ", filenames[i]);
 			fflush(stdout);
 			scanf("%d", &file_rows[i]);
 
-			filename_sizes[i] = strlen(filenames[i]) + 1;
+			// filename_sizes[i] = strlen(filenames[i]) + 1;
 		}
 	}
 
@@ -177,17 +182,17 @@ int main(int argc, char *argv[])
 
 	MPI_Bcast(&n_files, 1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(file_rows, n_files, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(filename_sizes, n_files, MPI_INT, 0, MPI_COMM_WORLD);
+	// MPI_Bcast(filename_sizes, n_files, MPI_INT, 0, MPI_COMM_WORLD);
 
-	for (i = 0; i < n_files; i++)
-	{
-		if (proc_id != 0)
-		{
-			filenames[i] = (char *)malloc(filename_sizes[i] * sizeof(char));
-		}
+	// for (i = 0; i < n_files; i++)
+	// {
+	// 	if (proc_id != 0)
+	// 	{
+	// 		filenames[i] = (char *)malloc(filename_sizes[i] * sizeof(char));
+	// 	}
 
-		MPI_Bcast(filenames[i], filename_sizes[i], MPI_CHAR, 0, MPI_COMM_WORLD);
-	}
+	// 	MPI_Bcast(&filenames[i], filename_sizes[i], MPI_CHAR, 0, MPI_COMM_WORLD);
+	// }
 
 	for (i = 0; i < n_files; i++)
 	{
